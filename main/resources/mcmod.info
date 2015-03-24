@@ -1,0 +1,16 @@
+[
+{
+  "modid": "atopia",
+  "name": "Minacraft Atopia",
+  "description": "Minecraft server mod that uses a smart-contract enabled blockchain.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["AndreasEris"],
+  "credits": "Andreas for writing code, David & Ksenia for the idea and starting the project, Eris Industries for enabling.",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
