@@ -23,14 +23,14 @@ public class FMLEventListener {
 	@SubscribeEvent
 	public void onPlayerJoin(PlayerLoggedInEvent event)
 	{
-		AtopiaMod.instance.bm.registerPlayerEvent(event.player.getName(), LOGIN_EVENT);
+		AtopiaMod.instance.bcm.getNetwork().registerPlayerEvent(event.player.getName(), LOGIN_EVENT);
 	}
 	
 	@SideOnly(Side.SERVER)
 	@SubscribeEvent
 	public void onPlayerJoin(PlayerLoggedOutEvent event)
 	{
-		AtopiaMod.instance.bm.registerPlayerEvent(event.player.getName(), LOGOUT_EVENT);
+		AtopiaMod.instance.bcm.getNetwork().registerPlayerEvent(event.player.getName(), LOGOUT_EVENT);
 	}
 	
 }

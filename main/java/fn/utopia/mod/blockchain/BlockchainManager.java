@@ -13,63 +13,68 @@ import fn.utopia.mod.blockchain.actions.Action;
 import fn.utopia.mod.blockchain.actions.impl.BroadcastPlayerEventAction;
 import fn.utopia.mod.blockchain.data.BlockchainData.PlayerEventData;
 import fn.utopia.mod.blockchain.data.DataCache;
+import fn.utopia.mod.blockchain.messages.Messages;
+import fn.utopia.mod.blockchain.net.BlockchainNetwork;
 import fn.utopia.mod.blockchain.net.RpcClient;
-import fn.utopia.mod.blockchain.profile.Profile;
-import fn.utopia.mod.blockchain.profile.Robotic;
+import fn.utopia.mod.main.AtopiaMod;
 
 public class BlockchainManager {
-
-	protected static final String URL = System.getProperty("url",
-			"ws://127.0.0.1:3000");
-
-	protected RpcClient client;
 	
-	public Queue<Action> actionQueue = new ConcurrentLinkedQueue<>();
-	public DataCache dataCache = new DataCache();
-	public Profile activeProfile = new Robotic(); 
-
-	public BlockchainManager() {
-		
+	// TODO see what values to use.
+	static final int ACTION_TICKS = 10;
+	
+	protected RpcClient client;
+	protected BlockchainNetwork bcn;
+	
+	protected Queue<Action> actionQueue = new ConcurrentLinkedQueue<Action>();
+	
+	protected DataCache dataCache = new DataCache();
+	protected Messages messages = new Messages();
+	
+	protected Laws laws;
+	
+	protected int aTicks = 0;
+	
+	public BlockchainManager(String hostAddress) {
+		bcn = new BlockchainNetwork(this, hostAddress);
+		laws = new Laws(this);
 	}
-
-	public void initRpcClient(String hostAddress) {
-		try {
-			client = new RpcClient(this, new URI(URL));
-			client.start();
-		} catch (URISyntaxException | InterruptedException e) {
-			e.printStackTrace();
-		}
+	
+	public void init() {
+		bcn.init();
+		_loadBlockchainData();
 	}
-
-	public void echo(String message) {
-		List<Object> params = new ArrayList<>();
-		params.add(message);
-		client.sendJson("server_echo", params);
+	
+	public void tick(){
+		if(++aTicks == ACTION_TICKS){
+    		aTicks = 5;
+    		while(!actionQueue.isEmpty()){
+    			actionQueue.poll().execute();
+    		}
+    	}
 	}
-
-	public void registerPlayerEvent(String userName, String eventType) {
-		List<Object> params = new ArrayList<>();
-		params.add(userName);
-		params.add(eventType);
-		client.sendJson("playerEvents_register", params);
+	
+	public void queueAction(Action a){
+		actionQueue.add(a);
 	}
-
-	public void handleIncoming(String method, Map<String,Object> result) {
-		switch (method) {
-		case "server_echo":
-			System.out.println("Echo received: " + result.get("message"));
-			break;
-		case "playerEvents_register":
-			PlayerEventData ped = new PlayerEventData();
-			ped.userName = (String)result.get("userName");
-			ped.eventType = (String)result.get("eventType");
-			System.out.println(ped);
-			dataCache.addEventData(ped);
-			System.out.println(dataCache);
-			actionQueue.add(new BroadcastPlayerEventAction(this, ped));
-			break;
-		default:
-			System.out.println("Unhandled event: " + method);
-		}
+	
+	public Laws getLaws(){
+		return laws;
+	}
+	
+	public Messages getMessages(){
+		return messages;
+	}
+	
+	public BlockchainNetwork getNetwork(){
+		return bcn;
+	}
+	
+	public DataCache getDataCache(){
+		return dataCache;
+	}
+	
+	protected void _loadBlockchainData(){
+		// TODO fill up with all the blockchain stuff.
 	}
 }
